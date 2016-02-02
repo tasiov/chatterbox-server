@@ -51,6 +51,7 @@ describe('Node Server Request Listener Function', function() {
     handler.requestHandler(req, res);
 
     var parsedBody = JSON.parse(res._data);
+    console.log(parsedBody);
     expect(parsedBody).to.have.property('results');
     expect(parsedBody.results).to.be.an('array');
     expect(res._ended).to.equal(true);
