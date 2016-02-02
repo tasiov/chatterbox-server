@@ -14,9 +14,10 @@ this file and include it in basic-server.js so that it actually works.
 var messageStore = {
   results: []
 };
-  
+var filename = './messageStore.json';
 // var storage = require('./basic-server');
 var requestHandler = function(request, response) {
+  var fs = require('fs');
   var url = require('url');
   var self = messageStore;
   var statusCode = 200;
@@ -24,8 +25,12 @@ var requestHandler = function(request, response) {
     getHandler: function () {
       // console.log('messageStore', messageStore);
       response.writeHead(statusCode, headers);
-      console.log(self, 'storage');
-      response.end(JSON.stringify(self));
+
+      fs.readFile(filename,function (err, data) {
+        if(err) throw err;
+        // var fileStore = JSON.parse(data.toString());
+        response.end(data.toString());
+      });
     },
 
     postHandler: function () {
@@ -37,10 +42,31 @@ var requestHandler = function(request, response) {
       request.on('end', function (data) {
           var postData = JSON.parse(buildRequest);
           var username = postData.username;
-          var message = postData.message;
-          console.log(postData, 'message recived');
+          var chatText = postData.text;
+          var createdAt = Date.now();
+          //console.log(postData, 'message recived');
           var id = Math.floor(Math.random() * 1000000);
-          self.results.push({username: username, message: message, objectId: id});
+          self.results.push({username: username, text: chatText, objectId: id, createdAt: createdAt});
+
+          fs.readFile(filename,function (err, data) {
+            if(err) throw err;
+            var fileStore = JSON.parse(data.toString());
+            var lastCreatedAt = fileStore.results[fileStore.results.length-1] && fileStore.results[fileStore.results.length-1].createdAt || 0;
+            //console.log(fileStore);
+            self.results.map(function (msg) {
+              console.log('message !!!', msg);
+              if (msg.createdAt > lastCreatedAt) {
+                fileStore.results.push(msg);
+              }
+            });
+            fs.writeFile(filename, JSON.stringify(fileStore), function (err) {
+              if (err) console.log('Could not write fileStore');
+              else console.log('File fileStore written');
+            });
+
+          });
+
+
           response.end(JSON.stringify({objectId:id}));        
       });
     },
@@ -66,7 +92,7 @@ var defaultCorsHeaders = {
 
   headers['Content-Type'] = "text/json";
   var path = url.parse(request.url).pathname;
-  var acceptedURLs = ['/classes/room', '/', '/log','/classes/room1', '/classes/messages'];
+  var acceptedURLs = ['/classes/room', '/', '/log','/classes/room1', '/classes/messages', '/classes/chatterbox'];
   console.log('path test', acceptedURLs.indexOf(path) !== -1);
   if (acceptedURLs.indexOf(path) === -1 ) {
     response.writeHead(404, headers);
