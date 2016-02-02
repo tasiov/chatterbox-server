@@ -17,17 +17,23 @@ var requestHandler = function(request, response) {
   var url = require('url');
   var statusCode = 200;
   var ChatServer = {
-    getHandler: function () {
-      response.writeHead(statusCode, headers);
-
+    getHandler: function (request, response) {
+      response.set(headers);
+      response.status(statusCode);
       fs.readFile(filename,function (err, data) {
-        if(err) throw err;
-        response.end(data.toString());
+        if(err) {
+          console.log('Could not read file!!');
+          throw err;
+        }
+        // console.log(data.toString());
+        //var reverseData = JSON.parse(data.toString()).results.reverse;
+        response.send(JSON.parse(data.toString()));
       });
     },
 
-    postHandler: function () {
-      response.writeHead(201, headers);
+    postHandler: function (request, response) {
+      response.set(headers);
+      response.status(201);
       var buildRequest = "";
       request.on('data', function (data) {
           buildRequest = data.toString();
@@ -52,15 +58,16 @@ var requestHandler = function(request, response) {
             });
           });
 
-          response.end(JSON.stringify({objectId:id}));        
+          response.send(JSON.stringify({objectId:id}));        
         });
     },
 
-    optionsHandler: function () {
+    optionsHandler: function (request, response) {
       headers['Content-Type'] = 'text/plain';
-      response.writeHead(statusCode, headers);
+      response.set(headers);
+      response.status(statusCode);
 
-      response.end(JSON.stringify({}));
+      response.send(JSON.stringify({}));
     }
   };
 
@@ -71,24 +78,25 @@ var defaultCorsHeaders = {
   "access-control-max-age": 10 // Seconds.
 };
 
-  console.log("Serving request type " + request.method + " for url " + request.url);
+  // console.log("Serving request type " + request.method + " for url " + request.url);
 
   var headers = defaultCorsHeaders;
 
   headers['Content-Type'] = "text/json";
-  var path = url.parse(request.url).pathname;
-  var acceptedURLs = ['/classes/room', '/', '/log','/classes/room1', '/classes/messages', '/classes/chatterbox'];
-  console.log('path test', acceptedURLs.indexOf(path) !== -1);
-  if (acceptedURLs.indexOf(path) === -1 ) {
-    response.writeHead(404, headers);
-    response.end('Not found on server');
-  } else if (request.method === 'GET'){
-    ChatServer.getHandler();
-  } else if (request.method === 'POST'){
-    ChatServer.postHandler();
-  } else if (request.method ==='OPTIONS'){
-    ChatServer.optionsHandler();
-  }
+  // var path = url.parse(request.url).pathname;
+  // var acceptedURLs = ['/classes/room', '/', '/log','/classes/room1', '/classes/messages', '/classes/chatterbox'];
+  // console.log('path test', acceptedURLs.indexOf(path) !== -1);
+  // if (acceptedURLs.indexOf(path) === -1 ) {
+  //   response.writeHead(404, headers);
+  //   response.end('Not found on server');
+  // } else if (request.method === 'GET'){
+  //   ChatServer.getHandler();
+  // } else if (request.method === 'POST'){
+  //   ChatServer.postHandler();
+  // } else if (request.method ==='OPTIONS'){
+  //   ChatServer.optionsHandler();
+  // }
+  return ChatServer;
 };
 exports.requestHandler = requestHandler;
 
