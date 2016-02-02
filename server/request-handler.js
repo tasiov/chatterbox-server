@@ -11,24 +11,17 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-var messageStore = {
-  results: []
-};
 var filename = './messageStore.json';
-// var storage = require('./basic-server');
 var requestHandler = function(request, response) {
   var fs = require('fs');
   var url = require('url');
-  var self = messageStore;
   var statusCode = 200;
   var ChatServer = {
     getHandler: function () {
-      // console.log('messageStore', messageStore);
       response.writeHead(statusCode, headers);
 
       fs.readFile(filename,function (err, data) {
         if(err) throw err;
-        // var fileStore = JSON.parse(data.toString());
         response.end(data.toString());
       });
     },
@@ -44,31 +37,23 @@ var requestHandler = function(request, response) {
           var username = postData.username;
           var chatText = postData.text;
           var createdAt = Date.now();
-          //console.log(postData, 'message recived');
+
           var id = Math.floor(Math.random() * 1000000);
-          self.results.push({username: username, text: chatText, objectId: id, createdAt: createdAt});
 
           fs.readFile(filename,function (err, data) {
             if(err) throw err;
             var fileStore = JSON.parse(data.toString());
-            var lastCreatedAt = fileStore.results[fileStore.results.length-1] && fileStore.results[fileStore.results.length-1].createdAt || 0;
-            //console.log(fileStore);
-            self.results.map(function (msg) {
-              console.log('message !!!', msg);
-              if (msg.createdAt > lastCreatedAt) {
-                fileStore.results.push(msg);
-              }
-            });
+            var result = {username: username, text: chatText, objectId: id, createdAt: createdAt};
+            fileStore.results.push(result);
+
             fs.writeFile(filename, JSON.stringify(fileStore), function (err) {
               if (err) console.log('Could not write fileStore');
               else console.log('File fileStore written');
             });
-
           });
 
-
           response.end(JSON.stringify({objectId:id}));        
-      });
+        });
     },
 
     optionsHandler: function () {
@@ -102,7 +87,6 @@ var defaultCorsHeaders = {
   } else if (request.method === 'POST'){
     ChatServer.postHandler();
   } else if (request.method ==='OPTIONS'){
-    // console.log('options: ', request);
     ChatServer.optionsHandler();
   }
 };
