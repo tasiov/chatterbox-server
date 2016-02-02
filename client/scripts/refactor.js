@@ -79,7 +79,7 @@ app = {
         data: { order: '-createdAt' },
         contentType: 'application/json',
         success: function(json) {
-          app.displayMessages(json.results);
+          app.displayMessages(JSON.parse(json).results);
         },
         complete: function() {
           app.stopSpinner();
@@ -96,7 +96,7 @@ app = {
         contentType: 'application/json',
         success: function(json) {
           message.objectId = json.objectId;
-          app.displayMessage(message);
+          // app.displayMessage(message);
         },
         complete: function() {
           app.stopSpinner();
