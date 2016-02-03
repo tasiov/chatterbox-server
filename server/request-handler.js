@@ -50,7 +50,7 @@ var requestHandler = function(request, response) {
             if(err) throw err;
             var fileStore = JSON.parse(data.toString());
             var result = {username: username, text: chatText, objectId: id, createdAt: createdAt};
-            fileStore.results.push(result);
+            fileStore.results.unshift(result);
 
             fs.writeFile(filename, JSON.stringify(fileStore), function (err) {
               if (err) console.log('Could not write fileStore');
