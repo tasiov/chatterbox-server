@@ -7,7 +7,7 @@ var handleRequest = Handler.requestHandler;
 var url = require('url');
 var ChatServer = handleRequest();
 
-var port = 3000;
+var port = process.env.PORT || 3000;
 
 var ip = "127.0.0.1";
 
