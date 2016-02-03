@@ -11,7 +11,7 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-var filename = './messageStore.json';
+var filename = 'messageStore.json';
 var requestHandler = function(request, response) {
   var fs = require('fs');
   var url = require('url');
